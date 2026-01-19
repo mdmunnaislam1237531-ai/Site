@@ -1,55 +1,204 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WhatsApp Pair Code Service</title>
+    <title>WhatsApp Pairing Service</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #ece5dd; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
-        h2 { color: #075e54; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: #25d366; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-        button:hover { background: #128c7e; }
-        #result { margin-top: 20px; padding: 15px; border: 2px dashed #25d366; border-radius: 8px; font-size: 24px; font-weight: bold; color: #075e54; display: none; letter-spacing: 4px; }
+        :root {
+            --primary-color: #25D366;
+            --secondary-color: #075E54;
+            --bg-color: #f4f7f6;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 70px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+
+        button:hover {
+            background-color: #20bd5a;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #code-display {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .code-box {
+            background: #f0fff4;
+            border: 2px dashed var(--primary-color);
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            letter-spacing: 8px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .status {
+            font-size: 12px;
+            margin-top: 10px;
+            color: #888;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>WA Pair Code</h2>
-        <input type="text" id="phone" placeholder="নম্বর দিন (যেমন: 88017...)">
-        <button onclick="getCode()">কোড জেনারেট করুন</button>
-        <div id="result" id="code-box">--------</div>
+
+<div class="container">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA Logo" class="logo">
+    <h1>WA Rental Service</h1>
+    <p>আপনার ফোন নম্বর দিন এবং ৮ সংখ্যার পেয়ারিং কোডটি নিন।</p>
+
+    <div class="input-group">
+        <label>হোয়াটসঅ্যাপ নম্বর</label>
+        <input type="text" id="phoneInput" placeholder="Ex: 88017XXXXXXXX" required>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <button id="submitBtn" onclick="requestPairCode()">কোড জেনারেট করুন</button>
 
-    <script>
-        // তোমার দেওয়া তথ্য দিয়ে কনফিগ সেট করা হয়েছে
-        const firebaseConfig = {
-            databaseURL: "https://hidndnd-default-rtdb.firebaseio.com/",
-            projectId: "hidndnd"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <div id="code-display">
+        <div class="code-box" id="pairCode">--------</div>
+        <div class="status">এই কোডটি আপনার হোয়াটসঅ্যাপের 'Linked Devices' এ গিয়ে বসান।</div>
+    </div>
+</div>
 
-        function getCode() {
-            const phone = document.getElementById('phone').value;
-            if(!phone) return alert("নম্বর দিন!");
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-            // নম্বরটি রিকোয়েস্ট হিসেবে পাঠানো
-            db.ref('requests/' + phone).set({ status: "pending" });
+<script>
+    // আপনার প্রজেক্ট কনফিগ এখানে আপডেট করা হয়েছে
+    const firebaseConfig = {
+        // আপনার সার্ভিস অ্যাকাউন্ট ফাইল অনুযায়ী প্রজেক্ট আইডি বসানো হয়েছে
+        apiKey: "AIzaSyB-W0_Example_Key_Replace_With_Actual_Web_Key", 
+        databaseURL: "https://hidndnd-default-rtdb.firebaseio.com", 
+        projectId: "hidndnd" 
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-            // রিয়েল-টাইমে কোড চেক করা
-            db.ref('codes/' + phone).on('value', (snap) => {
-                if(snap.val()) {
-                    const res = document.getElementById('result');
-                    res.innerText = snap.val();
-                    res.style.display = 'block';
-                }
-            });
+    function requestPairCode() {
+        const phone = document.getElementById('phoneInput').value.trim();
+        const btn = document.getElementById('submitBtn');
+        const codeDisplay = document.getElementById('code-display');
+        const pairCode = document.getElementById('pairCode');
+
+        if (!phone || phone.length < 10) {
+            alert("সঠিক নম্বর দিন (কান্ট্রি কোডসহ)।");
+            return;
         }
-    </script>
+
+        btn.innerText = "প্রসেসিং...";
+        btn.disabled = true;
+
+        // ফায়ারবেসে রিকোয়েস্ট পাঠানো
+        db.ref('requests/' + phone).set({
+            status: "pending",
+            timestamp: Date.now()
+        }).then(() => {
+            console.log("Request sent for: " + phone);
+        });
+
+        // রিয়েল-টাইমে কোডের জন্য অপেক্ষা করা
+        db.ref('codes/' + phone).on('value', (snapshot) => {
+            const code = snapshot.val();
+            if (code) {
+                pairCode.innerText = code;
+                codeDisplay.style.display = 'block';
+                btn.innerText = "কোড পাওয়া গেছে";
+                btn.style.backgroundColor = "#075E54";
+                btn.disabled = false;
+            }
+        });
+    }
+</script>
+
 </body>
 </html>
