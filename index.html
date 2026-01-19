@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Pair Code Service</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #ece5dd; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; width: 320px; }
+        h2 { color: #075e54; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background: #25d366; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        button:hover { background: #128c7e; }
+        #result { margin-top: 20px; padding: 15px; border: 2px dashed #25d366; border-radius: 8px; font-size: 24px; font-weight: bold; color: #075e54; display: none; letter-spacing: 4px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>WA Pair Code</h2>
+        <input type="text" id="phone" placeholder="নম্বর দিন (যেমন: 88017...)">
+        <button onclick="getCode()">কোড জেনারেট করুন</button>
+        <div id="result" id="code-box">--------</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // তোমার দেওয়া তথ্য দিয়ে কনফিগ সেট করা হয়েছে
+        const firebaseConfig = {
+            databaseURL: "https://hidndnd-default-rtdb.firebaseio.com/",
+            projectId: "hidndnd"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function getCode() {
+            const phone = document.getElementById('phone').value;
+            if(!phone) return alert("নম্বর দিন!");
+
+            // নম্বরটি রিকোয়েস্ট হিসেবে পাঠানো
+            db.ref('requests/' + phone).set({ status: "pending" });
+
+            // রিয়েল-টাইমে কোড চেক করা
+            db.ref('codes/' + phone).on('value', (snap) => {
+                if(snap.val()) {
+                    const res = document.getElementById('result');
+                    res.innerText = snap.val();
+                    res.style.display = 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
