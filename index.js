@@ -7,7 +7,7 @@ const serviceAccount = require("./firebase-key.json");
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://hidndnd-default-rtdb.firebaseio.com/"
+  databaseURL: "https://hidndnd-default-rtdb.firebaseio.com"
 });
 const db = admin.database();
 
@@ -22,12 +22,16 @@ async function startPairing(phone) {
     try {
         if (!sock.authState.creds.registered) {
             await delay(3000); 
-            const code = await sock.requestPairingCode(phone.trim());
+            // নম্বর থেকে স্পেস বা অন্য চিহ্ন সরানো
+            const cleanNumber = phone.replace(/[+ ]/g, '');
+            const code = await sock.requestPairingCode(cleanNumber);
+            
+            // ফায়ারবেসে কোডটি পাঠানো
             await db.ref('codes/' + phone).set(code);
-            console.log(`Success: ${phone} -> ${code}`);
+            console.log(`নম্বর ${phone} এর জন্য কোড জেনারেট হয়েছে: ${code}`);
         }
     } catch (err) {
-        console.log("Error: ", err);
+        console.log("কোড জেনারেট এরর: ", err);
     }
 }
 
@@ -37,4 +41,4 @@ db.ref('requests').on('child_added', (snapshot) => {
     startPairing(phone);
 });
 
-console.log("Server is running...");
+console.log("রেন্ডার সার্ভার পুরোপুরি সচল...");
