@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PINEX AI MOD</title>
+    <style>
+        /* বডি এবং ফন্ট */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+        }
+
+        /* মেইন বক্স */
+        #hack-box {
+            position: fixed;
+            top: 120px;
+            right: 10px;
+            width: 200px; /* পিরিয়ড নাম্বারের জন্য একটু চওড়া করা হলো */
+            background-color: #000000;
+            border: 2px solid #00ffcc;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+            color: white;
+            z-index: 99999;
+            padding: 15px 10px;
+            text-align: center;
+            cursor: move;
+            user-select: none;
+        }
+
+        /* হেডার নাম */
+        .header {
+            font-size: 18px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ff0055, #00ffcc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+        }
+
+        /* পিরিয়ড নাম্বার ডিজাইন */
+        .period-box {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 4px;
+            margin: 8px 0;
+            font-size: 12px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .period-label {
+            color: #888;
+            font-size: 10px;
+            display: block;
+        }
+        #period-id {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        /* টাইম */
+        .bd-time {
+            font-size: 11px;
+            color: #aaaaaa;
+            margin-bottom: 5px;
+        }
+
+        /* টাইমার লেবেল */
+        .timer-label {
+            font-size: 10px;
+            color: #ffcc00;
+            margin-top: 5px;
+        }
+
+        /* কাউন্টডাউন */
+        .timer-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 2px 0;
+        }
+
+        /* রেজাল্ট কন্টেইনার */
+        .result-box {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid #222;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* রেজাল্ট টেক্সট */
+        .result-text {
+            font-size: 45px;
+            font-weight: 900;
+            text-transform: uppercase;
+            line-height: 1;
+            display: none;
+            z-index: 2;
+        }
+
+        .big {
+            color: #ff2a2a;
+            text-shadow: 0 0 15px #ff0000;
+        }
+
+        .small {
+            color: #00d5ff;
+            text-shadow: 0 0 15px #00ccff;
+        }
+
+        /* লোডিং চাকা */
+        .loader {
+            border: 4px solid #111;
+            border-top: 4px solid #00ffcc;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* স্ট্যাটাস টেক্সট */
+        .status {
+            font-size: 10px;
+            margin-top: 8px;
+            color: #666;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        /* প্যাটার্ন বার (ভিজুয়্যাল ইফেক্ট) */
+        .pattern-dots {
+            display: flex;
+            justify-content: center;
+            gap: 2px;
+            margin-top: 5px;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #333;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="hack-box">
+        <div class="header">PINEX AI v2</div>
+        
+        <div class="bd-time"><span id="clock">00:00:00</span></div>
+
+        <div class="period-box">
+            <span class="period-label">PERIOD NUMBER</span>
+            <span id="period-id">Loading...</span>
+        </div>
+        
+        <div class="timer-label">TIME REMAINING</div>
+        <div class="timer-box" id="countdown">60</div>
+
+        <div class="pattern-dots" id="history-dots">
+            </div>
+
+        <div class="result-box">
+            <div class="loader" id="loader"></div>
+            <div class="result-text" id="signal">WAIT</div>
+        </div>
+
+        <div class="status" id="status-text">CONNECTING SERVER...</div>
+    </div>
+
+    <script>
+        const signalDisplay = document.getElementById('signal');
+        const loader = document.getElementById('loader');
+        const countdownDisplay = document.getElementById('countdown');
+        const clockDisplay = document.getElementById('clock');
+        const statusText = document.getElementById('status-text');
+        const periodDisplay = document.getElementById('period-id');
+        const historyDotsContainer = document.getElementById('history-dots');
+
+        // ড্র্যাগ ফাংশনালিটি
+        const el = document.getElementById("hack-box");
+        let isDragging = false, startX, startY, initialLeft, initialTop;
+
+        el.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = el.offsetLeft;
+            initialTop = el.offsetTop;
+            el.style.cursor = "grabbing";
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                el.style.left = `${initialLeft + (e.clientX - startX)}px`;
+                el.style.top = `${initialTop + (e.clientY - startY)}px`;
+            }
+        });
+
+        document.addEventListener("mouseup", () => {
+            isDragging = false;
+            el.style.cursor = "move";
+        });
+
+        // ---------------- লজিক শুরু ----------------
+
+        // পেছনের ১০টি রেজাল্ট জেনারেট করার ফাংশন (Simulation)
+        // এটি ব্যবহার করা হচ্ছে যাতে মনে হয় AI পেছনের ডাটা এনালাইসিস করছে
+        function getPseudoHistory(currentMinute) {
+            let history = [];
+            let bigCount = 0;
+            let smallCount = 0;
+
+            // পেছনের ১০ মিনিটের ডাটা তৈরি
+            for(let i = 10; i > 0; i--) {
+                let pastMin = currentMinute - i;
+                // একটি ফিক্সড ম্যাথ ফর্মুলা যাতে রিফ্রেশ দিলেও একই থাকে
+                let val = Math.sin(pastMin * 12.9898) * 43758.5453;
+                let isBig = (val - Math.floor(val)) > 0.5;
+                
+                history.push(isBig ? "BIG" : "SMALL");
+                if(isBig) bigCount++; else smallCount++;
+            }
+            return { history, bigCount, smallCount };
+        }
+
+        // মেইন প্রেডিকশন লজিক
+        function analyzeAndPredict(minute) {
+            const data = getPseudoHistory(minute);
+            const { bigCount, smallCount, history } = data;
+            
+            // ভিজ্যুয়াল ডট আপডেট করা (১০টা ডট)
+            historyDotsContainer.innerHTML = '';
+            history.forEach(res => {
+                let dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.backgroundColor = res === "BIG" ? "#ff2a2a" : "#00d5ff";
+                historyDotsContainer.appendChild(dot);
+            });
+
+            // লজিক: ট্রেন্ড এনালাইসিস
+            let prediction = "";
+
+            // ১. যদি লাস্ট ৩টা একই হয়, তাহলে ট্রেন্ড ব্রেক করবে (বিপরীত দিবে)
+            const last1 = history[9];
+            const last2 = history[8];
+            const last3 = history[7];
+
+            if (last1 === last2 && last2 === last3) {
+                // ৩ বার একই আসলে উল্টোটা প্রেডিক্ট করবে
+                prediction = (last1 === "BIG") ? "SMALL" : "BIG";
+            } 
+            // ২. যদি BIG এর সংখ্যা অনেক বেশি হয় (১০ এর মধ্যে ৭+), তাহলে SMALL দিবে
+            else if (bigCount >= 7) {
+                prediction = "SMALL";
+            }
+            // ৩. যদি SMALL এর সংখ্যা অনেক বেশি হয়, তাহলে BIG দিবে
+            else if (smallCount >= 7) {
+                prediction = "BIG";
+            }
+            // ৪. সাধারণ অবস্থায় জিগজ্যাগ ফলো করবে
+            else {
+                // সিম্পল অল্টারনেটিভ লজিক
+                prediction = (last1 === "BIG") ? "SMALL" : "BIG";
+            }
+
+            return prediction;
+        }
+
+        // মেইন ইঞ্জিন আপডেট
+        function updateEngine() {
+            const now = new Date();
+            
+            // বাংলাদেশ টাইম সেটআপ
+            const timeString = now.toLocaleTimeString("en-US", { timeZone: "Asia/Dhaka", hour12: false });
+            clockDisplay.innerText = timeString;
+
+            // পিরিয়ড নাম্বার ক্যালকুলেশন (YYYYMMDD + Minute)
+            // Wingo স্টাইলে পিরিয়ড নাম্বার: তারিখ + দিনের কততম মিনিট
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const totalMinutes = now.getHours() * 60 + now.getMinutes();
+            // পিরিয়ড নাম্বার সাধারণত এই ফরম্যাটে হয়: 202401220100 (শেষের ৪ ডিজিট মিনিটের সংখ্যা)
+            const periodNum = `${year}${month}${day}1${String(totalMinutes).padStart(4, '0')}`;
+            periodDisplay.innerText = periodNum;
+
+            const seconds = now.getSeconds(); 
+            const remaining = 60 - seconds;
+            
+            countdownDisplay.innerText = remaining < 10 ? "0" + remaining : remaining;
+            countdownDisplay.style.color = remaining <= 5 ? "#ff0055" : "#ffffff";
+
+            // টাইমিং লজিক
+            if (seconds < 33) {
+                // রেজাল্ট হাইড, এনালাইসিস চলছে
+                signalDisplay.style.display = "none";
+                loader.style.display = "block";
+                
+                // টেক্সট এনিমেশন
+                if(seconds % 2 === 0) {
+                    statusText.innerText = "READING MARKET...";
+                    statusText.style.color = "#00ffcc";
+                } else {
+                    statusText.innerText = "CHECKING HISTORY...";
+                    statusText.style.color = "#ffffff";
+                }
+
+                // ডটগুলো ঝাপসা থাকবে লোডিং এর সময়
+                historyDotsContainer.style.opacity = "0.5";
+
+            } else {
+                // রেজাল্ট শো
+                loader.style.display = "none";
+                signalDisplay.style.display = "block";
+                historyDotsContainer.style.opacity = "1";
+                
+                // প্রেডিকশন জেনারেট (বর্তমান মিনিটের উপর ভিত্তি করে)
+                const finalSignal = analyzeAndPredict(totalMinutes);
+                
+                if(finalSignal === "BIG") {
+                    signalDisplay.innerText = "BIG";
+                    signalDisplay.className = "result-text big";
+                } else {
+                    signalDisplay.innerText = "SMALL";
+                    signalDisplay.className = "result-text small";
+                }
+                
+                statusText.innerText = "PREDICTION ACTIVE";
+                statusText.style.color = "#ffcc00";
+            }
+        }
+
+        setInterval(updateEngine, 1000);
+        updateEngine();
+
+    </script>
+</body>
+</html>
