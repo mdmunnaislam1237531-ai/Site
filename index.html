@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পীনেক্স মুড - স্পেশাল ভয়েস</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            display: flex; justify-content: center; align-items: center;
+            height: 100vh; background: #0f0c29;
+            background: linear-gradient(135deg, #1e1e2f, #11011b);
+            color: white; font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        #notification-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            padding: 40px; border-radius: 25px;
+            text-align: center; border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.6s ease-out;
+            max-width: 300px;
+        }
+
+        h2 { font-size: 22px; margin-bottom: 10px; color: #00d2ff; }
+        p { font-size: 14px; margin-bottom: 25px; opacity: 0.8; }
+
+        .play-btn {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white; border: none; padding: 15px 35px;
+            font-size: 18px; border-radius: 50px; cursor: pointer;
+            font-weight: bold; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+        }
+
+        .play-btn:active { transform: scale(0.95); }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="notification-card">
+        <h2>পীনেক্স অডিও জোন 🎧</h2>
+        <p id="status-text">একটি নতুন ভয়েস মেসেজ এসেছে। শুনতে বাটনে ক্লিক করুন।</p>
+        <button class="play-btn" onclick="playMyAudio()">বার্তাটি শুনুন</button>
+    </div>
+
+    <audio id="mainPlayer"></audio>
+
+    <script>
+        // আপনার অডিও ফাইলের লিস্ট (v1, v2, v3... এভাবে নাম দিন)
+        // আপনার কাছে যতগুলো অডিও আছে সেই অনুযায়ী এখানে লিস্ট বাড়ান
+        var playlist = ["v1.mp3", "v2.mp3", "v3.mp3", "v4.mp3"]; 
+        var currentTrack = 0;
+
+        function playMyAudio() {
+            var player = document.getElementById("mainPlayer");
+            var status = document.getElementById("status-text");
+            var btn = document.querySelector(".play-btn");
+
+            // অডিও সোর্স সেট করা
+            player.src = playlist[currentTrack];
+            player.play();
+
+            // টেক্সট আপডেট
+            status.innerText = "এখন প্লে হচ্ছে: " + playlist[currentTrack];
+            btn.innerText = "পরের বার্তা";
+
+            // পরের বারের জন্য ইন্ডেক্স বাড়ানো
+            currentTrack++;
+
+            // সব শেষ হয়ে গেলে আবার প্রথম থেকে শুরু
+            if (currentTrack >= playlist.length) {
+                currentTrack = 0;
+            }
+        }
+    </script>
+</body>
+</html>
